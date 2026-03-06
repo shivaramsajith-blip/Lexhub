@@ -1,0 +1,1389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LexHub — Case Management</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #C9A84C;
+    --gold-light: #E8C97A;
+    --gold-dim: rgba(201,168,76,0.15);
+    --dark: #0D0F14;
+    --dark2: #13161E;
+    --dark3: #1A1E2A;
+    --dark4: #222736;
+    --border: rgba(201,168,76,0.2);
+    --text: #E8E6E0;
+    --text-muted: #8A8880;
+    --active-green: #2ECC71;
+    --dormant-grey: #5A5E6B;
+    --urgent-red: #E74C3C;
+    --hearing-blue: #3498DB;
+    --font-display: 'Cormorant Garamond', serif;
+    --font-body: 'DM Sans', sans-serif;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    background: var(--dark);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 14px;
+    min-height: 100vh;
+    display: flex;
+    overflow: hidden;
+  }
+
+  /* SIDEBAR */
+  .sidebar {
+    width: 240px;
+    background: var(--dark2);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    height: 100vh;
+    overflow-y: auto;
+  }
+
+  .logo {
+    padding: 28px 24px 20px;
+    border-bottom: 1px solid var(--border);
+  }
+  .logo h1 {
+    font-family: var(--font-display);
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--gold);
+    letter-spacing: 1px;
+  }
+  .logo p {
+    font-size: 10px;
+    color: var(--text-muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+
+  .nav-section {
+    padding: 16px 12px 8px;
+  }
+  .nav-label {
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding: 0 12px;
+    margin-bottom: 6px;
+  }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    color: var(--text-muted);
+    font-size: 13px;
+    transition: all 0.2s;
+    font-weight: 500;
+  }
+  .nav-item:hover { background: var(--dark3); color: var(--text); }
+  .nav-item.active { background: var(--gold-dim); color: var(--gold); }
+  .nav-item .icon { font-size: 15px; width: 18px; text-align: center; }
+  .nav-badge {
+    margin-left: auto;
+    background: var(--gold);
+    color: var(--dark);
+    border-radius: 10px;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 1px 7px;
+    min-width: 20px;
+    text-align: center;
+  }
+  .nav-badge.red { background: var(--urgent-red); color: #fff; }
+
+  .sidebar-footer {
+    margin-top: auto;
+    padding: 16px;
+    border-top: 1px solid var(--border);
+    font-size: 11px;
+    color: var(--text-muted);
+    text-align: center;
+  }
+  .firm-name {
+    font-family: var(--font-display);
+    font-size: 13px;
+    color: var(--text);
+    font-weight: 600;
+    margin-bottom: 2px;
+  }
+
+  /* MAIN */
+  .main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  .topbar {
+    background: var(--dark2);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 28px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-shrink: 0;
+  }
+  .topbar-title {
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--text);
+    flex: 1;
+  }
+  .search-bar {
+    display: flex;
+    align-items: center;
+    background: var(--dark3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 7px 14px;
+    gap: 8px;
+    width: 280px;
+  }
+  .search-bar input {
+    background: none;
+    border: none;
+    outline: none;
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 13px;
+    width: 100%;
+  }
+  .search-bar input::placeholder { color: var(--text-muted); }
+
+  .btn {
+    padding: 8px 18px;
+    border-radius: 7px;
+    border: none;
+    cursor: pointer;
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 500;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .btn-gold {
+    background: var(--gold);
+    color: var(--dark);
+  }
+  .btn-gold:hover { background: var(--gold-light); }
+  .btn-outline {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+  }
+  .btn-outline:hover { border-color: var(--gold); color: var(--gold); }
+
+  /* STATS ROW */
+  .stats-row {
+    display: flex;
+    gap: 16px;
+    padding: 20px 28px 0;
+    flex-shrink: 0;
+  }
+  .stat-card {
+    flex: 1;
+    background: var(--dark2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 20px;
+  }
+  .stat-label {
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+  }
+  .stat-value {
+    font-family: var(--font-display);
+    font-size: 30px;
+    font-weight: 700;
+    color: var(--gold);
+    line-height: 1;
+  }
+  .stat-sub { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+
+  /* TABS */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    padding: 20px 28px 0;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .tab {
+    padding: 8px 20px;
+    border-radius: 6px 6px 0 0;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-muted);
+    transition: all 0.2s;
+    border: 1px solid transparent;
+    border-bottom: none;
+    position: relative;
+    bottom: -1px;
+  }
+  .tab.active {
+    background: var(--dark);
+    border-color: var(--border);
+    border-bottom-color: var(--dark);
+    color: var(--gold);
+  }
+  .tab:hover:not(.active) { color: var(--text); }
+
+  /* CONTENT */
+  .content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px 28px;
+  }
+
+  /* CASE TABLE */
+  .case-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  .case-table th {
+    text-align: left;
+    padding: 10px 14px;
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    font-weight: 600;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+  }
+  .case-table th:hover { color: var(--gold); }
+  .case-table tr.case-row {
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .case-table tr.case-row:hover { background: var(--dark3); }
+  .case-table td {
+    padding: 13px 14px;
+    vertical-align: middle;
+  }
+
+  .case-num {
+    font-family: var(--font-display);
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--gold);
+  }
+  .case-title { font-weight: 500; color: var(--text); }
+  .case-client { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+  }
+  .badge-active { background: rgba(46,204,113,0.15); color: var(--active-green); }
+  .badge-dormant { background: rgba(90,94,107,0.2); color: var(--dormant-grey); }
+  .badge-urgent { background: rgba(231,76,60,0.15); color: var(--urgent-red); }
+  .badge-hearing { background: rgba(52,152,219,0.15); color: var(--hearing-blue); }
+  .badge-closed { background: rgba(255,255,255,0.05); color: #555; }
+
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; display: inline-block; }
+
+  .hearing-date {
+    font-weight: 600;
+    color: var(--text);
+  }
+  .hearing-date.soon { color: var(--urgent-red); }
+  .hearing-date.upcoming { color: var(--hearing-blue); }
+
+  .assignee {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    flex-shrink: 0;
+    color: var(--dark);
+  }
+
+  /* MODAL */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+  }
+  .modal-overlay.open { opacity: 1; pointer-events: all; }
+  .modal {
+    background: var(--dark2);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    width: 720px;
+    max-height: 90vh;
+    overflow-y: auto;
+    transform: translateY(20px);
+    transition: transform 0.2s;
+  }
+  .modal-overlay.open .modal { transform: translateY(0); }
+  .modal-header {
+    padding: 24px 28px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+  }
+  .modal-title {
+    font-family: var(--font-display);
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text);
+  }
+  .modal-subtitle { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+  .modal-close {
+    background: none; border: none; color: var(--text-muted);
+    font-size: 22px; cursor: pointer; padding: 0 4px;
+    line-height: 1;
+  }
+  .modal-close:hover { color: var(--text); }
+  .modal-body { padding: 24px 28px; }
+  .modal-footer {
+    padding: 16px 28px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+  }
+
+  /* FORM */
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-group.full { grid-column: 1/-1; }
+  .form-label {
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    font-weight: 600;
+  }
+  .form-control {
+    background: var(--dark3);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    padding: 9px 13px;
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.2s;
+    width: 100%;
+  }
+  .form-control:focus { border-color: var(--gold); }
+  .form-control option { background: var(--dark3); }
+  textarea.form-control { resize: vertical; min-height: 80px; }
+
+  /* DETAIL MODAL */
+  .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+  .detail-item {
+    padding: 14px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+  .detail-item:nth-child(odd) { padding-right: 24px; border-right: 1px solid rgba(255,255,255,0.05); }
+  .detail-item:nth-child(even) { padding-left: 24px; }
+  .detail-label { font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 5px; }
+  .detail-value { font-size: 14px; color: var(--text); font-weight: 500; }
+
+  .section-title {
+    font-family: var(--font-display);
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--gold);
+    margin: 20px 0 12px;
+  }
+
+  .timeline { display: flex; flex-direction: column; gap: 0; }
+  .timeline-item {
+    display: flex;
+    gap: 14px;
+    position: relative;
+    padding-bottom: 16px;
+  }
+  .timeline-item:last-child { padding-bottom: 0; }
+  .timeline-dot-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
+    padding-top: 3px;
+  }
+  .timeline-dot-inner {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--gold);
+    border: 2px solid var(--dark2);
+    flex-shrink: 0;
+  }
+  .timeline-line {
+    width: 1px; flex: 1;
+    background: var(--border);
+    margin-top: 4px;
+  }
+  .timeline-content { flex: 1; }
+  .timeline-date { font-size: 11px; color: var(--text-muted); margin-bottom: 3px; }
+  .timeline-text { font-size: 13px; color: var(--text); }
+
+  .note-box {
+    background: var(--dark3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px;
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.6;
+    white-space: pre-wrap;
+  }
+
+  /* EMPTY STATE */
+  .empty-state {
+    text-align: center;
+    padding: 60px 0;
+    color: var(--text-muted);
+  }
+  .empty-icon { font-size: 40px; margin-bottom: 14px; }
+  .empty-text { font-family: var(--font-display); font-size: 20px; color: var(--text); margin-bottom: 6px; }
+  .empty-sub { font-size: 13px; }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--dark4); border-radius: 10px; }
+
+  /* FILTER ROW */
+  .filter-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .filter-chip {
+    padding: 5px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    transition: all 0.15s;
+  }
+  .filter-chip:hover { border-color: var(--gold); color: var(--gold); }
+  .filter-chip.active { background: var(--gold-dim); border-color: var(--gold); color: var(--gold); }
+
+  .court-tag {
+    font-size: 11px;
+    color: var(--text-muted);
+    background: var(--dark3);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 4px;
+    padding: 2px 7px;
+  }
+
+  .actions-cell { display: flex; gap: 6px; }
+  .icon-btn {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    color: var(--text-muted);
+    padding: 5px 8px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: all 0.15s;
+  }
+  .icon-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+  .urgency-bar {
+    background: var(--dark3);
+    border-left: 3px solid var(--gold);
+    border-radius: 0 6px 6px 0;
+    padding: 10px 14px;
+    margin-bottom: 10px;
+    font-size: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .urgency-bar.red { border-color: var(--urgent-red); }
+  .urgency-label { font-weight: 600; color: var(--text); }
+  .urgency-sub { color: var(--text-muted); }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="logo">
+    <h1>LexHub</h1>
+    <p>Case Management</p>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-label">Overview</div>
+    <div class="nav-item active" onclick="showTab('dashboard')">
+      <span class="icon">⚖</span> Dashboard
+    </div>
+    <div class="nav-item" onclick="showTab('cases')">
+      <span class="icon">📁</span> All Cases
+      <span class="nav-badge" id="all-badge">0</span>
+    </div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-label">Case Status</div>
+    <div class="nav-item" onclick="filterByStatus('Active')">
+      <span class="icon">🟢</span> Active Cases
+      <span class="nav-badge" id="active-badge">0</span>
+    </div>
+    <div class="nav-item" onclick="filterByStatus('Urgent')">
+      <span class="icon">🔴</span> Urgent
+      <span class="nav-badge red" id="urgent-badge">0</span>
+    </div>
+    <div class="nav-item" onclick="filterByStatus('Dormant')">
+      <span class="icon">⏸</span> Dormant
+    </div>
+    <div class="nav-item" onclick="filterByStatus('Closed')">
+      <span class="icon">✅</span> Closed
+    </div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-label">Courts</div>
+    <div class="nav-item" onclick="filterByCourt('Dubai Court of First Instance')">
+      <span class="icon">🏛</span> Court of First Instance
+    </div>
+    <div class="nav-item" onclick="filterByCourt('Dubai Court of Appeal')">
+      <span class="icon">🏛</span> Court of Appeal
+    </div>
+    <div class="nav-item" onclick="filterByCourt('Dubai Court of Cassation')">
+      <span class="icon">🏛</span> Court of Cassation
+    </div>
+    <div class="nav-item" onclick="filterByCourt('DIFC Court')">
+      <span class="icon">🏛</span> DIFC Court
+    </div>
+  </div>
+
+  <div class="sidebar-footer">
+    <div class="firm-name" id="firm-name-display">Your Law Firm</div>
+    <div>Dubai, UAE · 4 Members</div>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<main class="main">
+  <div class="topbar">
+    <div class="topbar-title" id="page-title">Dashboard</div>
+    <div class="search-bar">
+      <span>🔍</span>
+      <input type="text" placeholder="Search cases, clients..." id="search-input" oninput="applySearch()">
+    </div>
+    <button class="btn btn-gold" onclick="openNewCase()">+ New Case</button>
+  </div>
+
+  <!-- DASHBOARD VIEW -->
+  <div id="dashboard-view" class="content">
+    <div class="stats-row" style="padding:0 0 20px;">
+      <div class="stat-card">
+        <div class="stat-label">Total Cases</div>
+        <div class="stat-value" id="stat-total">0</div>
+        <div class="stat-sub">All time</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Active Cases</div>
+        <div class="stat-value" id="stat-active">0</div>
+        <div class="stat-sub">Currently progressing</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Urgent</div>
+        <div class="stat-value" id="stat-urgent" style="color: var(--urgent-red)">0</div>
+        <div class="stat-sub">Hearings within 7 days</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Dormant</div>
+        <div class="stat-value" id="stat-dormant" style="color: var(--dormant-grey)">0</div>
+        <div class="stat-sub">Awaiting / On hold</div>
+      </div>
+    </div>
+
+    <div id="upcoming-hearings" style="margin-bottom: 24px;"></div>
+
+    <div class="section-title">Recent Cases</div>
+    <table class="case-table" id="recent-table">
+      <thead>
+        <tr>
+          <th>Case No.</th>
+          <th>Case Title</th>
+          <th>Status</th>
+          <th>Court</th>
+          <th>Next Hearing</th>
+          <th>Assigned To</th>
+        </tr>
+      </thead>
+      <tbody id="recent-tbody"></tbody>
+    </table>
+  </div>
+
+  <!-- ALL CASES VIEW -->
+  <div id="cases-view" class="content" style="display:none;">
+    <div class="filter-row" id="filter-row">
+      <span style="font-size:12px; color:var(--text-muted); font-weight:600;">Filter:</span>
+      <div class="filter-chip active" onclick="setFilter('All', this)">All</div>
+      <div class="filter-chip" onclick="setFilter('Active', this)">Active</div>
+      <div class="filter-chip" onclick="setFilter('Urgent', this)">Urgent</div>
+      <div class="filter-chip" onclick="setFilter('Dormant', this)">Dormant</div>
+      <div class="filter-chip" onclick="setFilter('Closed', this)">Closed</div>
+    </div>
+    <table class="case-table" id="all-cases-table">
+      <thead>
+        <tr>
+          <th onclick="sortTable('caseNumber')">Case No. ↕</th>
+          <th onclick="sortTable('title')">Case Title ↕</th>
+          <th onclick="sortTable('status')">Status ↕</th>
+          <th>Court</th>
+          <th onclick="sortTable('nextHearing')">Next Hearing ↕</th>
+          <th>Assigned</th>
+          <th>Type</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="all-tbody"></tbody>
+    </table>
+    <div id="empty-msg" class="empty-state" style="display:none;">
+      <div class="empty-icon">📂</div>
+      <div class="empty-text">No Cases Found</div>
+      <div class="empty-sub">Try adjusting your filters or add a new case.</div>
+    </div>
+  </div>
+</main>
+
+<!-- NEW CASE MODAL -->
+<div class="modal-overlay" id="new-case-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title">New Case</div>
+        <div class="modal-subtitle">Add a new case to the management system</div>
+      </div>
+      <button class="modal-close" onclick="closeModal('new-case-modal')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Case Number *</label>
+          <input class="form-control" id="f-caseNumber" placeholder="e.g. 2024/123/Commercial">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Status *</label>
+          <select class="form-control" id="f-status">
+            <option value="Active">Active</option>
+            <option value="Urgent">Urgent</option>
+            <option value="Dormant">Dormant</option>
+            <option value="Hearing Scheduled">Hearing Scheduled</option>
+          </select>
+        </div>
+        <div class="form-group full">
+          <label class="form-label">Case Title *</label>
+          <input class="form-control" id="f-title" placeholder="e.g. Al Rashid Trading LLC v. Emirates Supplies Co.">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Client Name *</label>
+          <input class="form-control" id="f-client" placeholder="Client / Party name">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Opposing Party</label>
+          <input class="form-control" id="f-opposing" placeholder="Opposing party name">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Court *</label>
+          <select class="form-control" id="f-court">
+            <option>Dubai Court of First Instance</option>
+            <option>Dubai Court of Appeal</option>
+            <option>Dubai Court of Cassation</option>
+            <option>DIFC Court</option>
+            <option>Execution Court</option>
+            <option>Personal Status Court</option>
+            <option>Labour Court</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Case Type</label>
+          <select class="form-control" id="f-type">
+            <option>Civil</option>
+            <option>Commercial</option>
+            <option>Labour</option>
+            <option>Criminal</option>
+            <option>Family / Personal Status</option>
+            <option>Real Estate</option>
+            <option>Execution</option>
+            <option>Administrative</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Next Hearing Date</label>
+          <input class="form-control" id="f-nextHearing" type="date">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Assigned Attorney</label>
+          <select class="form-control" id="f-assignee">
+            <option value="">— Select —</option>
+            <option>Sudheer Devarajan</option>
+            <option>Attorney 2</option>
+            <option>Attorney 3</option>
+            <option>Attorney 4</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Claim Value (AED)</label>
+          <input class="form-control" id="f-value" placeholder="e.g. 500,000" type="text">
+        </div>
+        <div class="form-group full">
+          <label class="form-label">Case Summary / Notes</label>
+          <textarea class="form-control" id="f-notes" placeholder="Brief summary of the case, key facts, current stage..."></textarea>
+        </div>
+        <div class="form-group full">
+          <label class="form-label">Case Progression / Latest Update</label>
+          <input class="form-control" id="f-progress" placeholder="e.g. Submitted statement of claim, awaiting court date">
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('new-case-modal')">Cancel</button>
+      <button class="btn btn-gold" onclick="saveNewCase()">Save Case</button>
+    </div>
+  </div>
+</div>
+
+<!-- DETAIL MODAL -->
+<div class="modal-overlay" id="detail-modal">
+  <div class="modal" style="width:780px;">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="d-title">Case Title</div>
+        <div class="modal-subtitle" id="d-subtitle">Case No.</div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button class="btn btn-outline" onclick="editCase()" style="font-size:12px; padding:6px 14px;">✏ Edit</button>
+        <button class="modal-close" onclick="closeModal('detail-modal')">×</button>
+      </div>
+    </div>
+    <div class="modal-body" id="detail-body"></div>
+  </div>
+</div>
+
+<!-- EDIT MODAL (reuse new case form) -->
+<div class="modal-overlay" id="edit-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title">Edit Case</div>
+        <div class="modal-subtitle">Update case information</div>
+      </div>
+      <button class="modal-close" onclick="closeModal('edit-modal')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Case Number</label>
+          <input class="form-control" id="e-caseNumber">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Status</label>
+          <select class="form-control" id="e-status">
+            <option value="Active">Active</option>
+            <option value="Urgent">Urgent</option>
+            <option value="Dormant">Dormant</option>
+            <option value="Hearing Scheduled">Hearing Scheduled</option>
+            <option value="Closed">Closed</option>
+          </select>
+        </div>
+        <div class="form-group full">
+          <label class="form-label">Case Title</label>
+          <input class="form-control" id="e-title">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Client Name</label>
+          <input class="form-control" id="e-client">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Opposing Party</label>
+          <input class="form-control" id="e-opposing">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Court</label>
+          <select class="form-control" id="e-court">
+            <option>Dubai Court of First Instance</option>
+            <option>Dubai Court of Appeal</option>
+            <option>Dubai Court of Cassation</option>
+            <option>DIFC Court</option>
+            <option>Execution Court</option>
+            <option>Personal Status Court</option>
+            <option>Labour Court</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Case Type</label>
+          <select class="form-control" id="e-type">
+            <option>Civil</option>
+            <option>Commercial</option>
+            <option>Labour</option>
+            <option>Criminal</option>
+            <option>Family / Personal Status</option>
+            <option>Real Estate</option>
+            <option>Execution</option>
+            <option>Administrative</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Next Hearing Date</label>
+          <input class="form-control" id="e-nextHearing" type="date">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Assigned Attorney</label>
+          <select class="form-control" id="e-assignee">
+            <option value="">— Select —</option>
+            <option>Sudheer Devarajan</option>
+            <option>Attorney 2</option>
+            <option>Attorney 3</option>
+            <option>Attorney 4</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Claim Value (AED)</label>
+          <input class="form-control" id="e-value">
+        </div>
+        <div class="form-group full">
+          <label class="form-label">Case Summary / Notes</label>
+          <textarea class="form-control" id="e-notes"></textarea>
+        </div>
+        <div class="form-group full">
+          <label class="form-label">Add Progression Update</label>
+          <input class="form-control" id="e-progress" placeholder="Add a new update to the timeline...">
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="deleteCase()" style="margin-right:auto; color: var(--urgent-red); border-color: rgba(231,76,60,0.3);">🗑 Delete Case</button>
+      <button class="btn btn-outline" onclick="closeModal('edit-modal')">Cancel</button>
+      <button class="btn btn-gold" onclick="saveEdit()">Update Case</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ---- DATA STORE ----
+let cases = JSON.parse(localStorage.getItem('lexhub_cases') || '[]');
+let currentFilter = 'All';
+let currentSort = { key: null, asc: true };
+let viewingCaseId = null;
+let editingCaseId = null;
+let searchQuery = '';
+
+const AVATARS = ['#C9A84C','#3498DB','#2ECC71','#E74C3C','#9B59B6','#F39C12'];
+const AVATAR_INITIALS = {};
+
+function avatarColor(name) {
+  if (!name) return '#555';
+  let sum = 0;
+  for (let c of name) sum += c.charCodeAt(0);
+  return AVATARS[sum % AVATARS.length];
+}
+function initials(name) {
+  if (!name) return '?';
+  return name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+}
+
+function save() {
+  localStorage.setItem('lexhub_cases', JSON.stringify(cases));
+  updateBadges();
+  if (document.getElementById('cases-view').style.display !== 'none') renderAllCases();
+  if (document.getElementById('dashboard-view').style.display !== 'none') renderDashboard();
+}
+
+function newId() {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2);
+}
+
+function daysUntil(dateStr) {
+  if (!dateStr) return null;
+  const d = new Date(dateStr);
+  const now = new Date();
+  now.setHours(0,0,0,0);
+  return Math.ceil((d - now) / 86400000);
+}
+
+function formatDate(dateStr) {
+  if (!dateStr) return '—';
+  const d = new Date(dateStr);
+  return d.toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' });
+}
+
+// ---- BADGES ----
+function updateBadges() {
+  const active = cases.filter(c=>c.status==='Active'||c.status==='Hearing Scheduled').length;
+  const urgent = cases.filter(c=>c.status==='Urgent'||(c.nextHearing && daysUntil(c.nextHearing)<=7 && daysUntil(c.nextHearing)>=0)).length;
+  document.getElementById('all-badge').textContent = cases.length;
+  document.getElementById('active-badge').textContent = active;
+  document.getElementById('urgent-badge').textContent = urgent;
+  document.getElementById('stat-total').textContent = cases.length;
+  document.getElementById('stat-active').textContent = active;
+  document.getElementById('stat-urgent').textContent = urgent;
+  document.getElementById('stat-dormant').textContent = cases.filter(c=>c.status==='Dormant').length;
+}
+
+// ---- STATUS BADGE HTML ----
+function statusBadge(status) {
+  const map = {
+    'Active': 'badge-active',
+    'Urgent': 'badge-urgent',
+    'Dormant': 'badge-dormant',
+    'Hearing Scheduled': 'badge-hearing',
+    'Closed': 'badge-closed'
+  };
+  const cls = map[status] || 'badge-dormant';
+  return `<span class="badge ${cls}"><span class="dot"></span>${status}</span>`;
+}
+
+// ---- RENDER DASHBOARD ----
+function renderDashboard() {
+  updateBadges();
+  // Upcoming hearings
+  const upcoming = cases
+    .filter(c=>c.nextHearing && daysUntil(c.nextHearing) >= 0 && daysUntil(c.nextHearing) <= 14)
+    .sort((a,b)=> new Date(a.nextHearing)-new Date(b.nextHearing))
+    .slice(0,5);
+
+  const uh = document.getElementById('upcoming-hearings');
+  if (upcoming.length > 0) {
+    let html = `<div class="section-title">⚠ Upcoming Hearings (Next 14 Days)</div>`;
+    upcoming.forEach(c => {
+      const d = daysUntil(c.nextHearing);
+      const red = d <= 3;
+      html += `<div class="urgency-bar ${red?'red':''}" onclick="openDetail('${c.id}')" style="cursor:pointer;">
+        <div><span class="urgency-label">${c.title}</span> <span class="court-tag">${c.court}</span></div>
+        <div><span style="color:${red?'var(--urgent-red)':'var(--hearing-blue)'}; font-weight:700;">${formatDate(c.nextHearing)}</span> <span class="urgency-sub">(${d === 0 ? 'Today' : d + ' day' + (d===1?'':'s')})</span></div>
+      </div>`;
+    });
+    uh.innerHTML = html;
+  } else {
+    uh.innerHTML = '';
+  }
+
+  // Recent
+  const recent = [...cases].sort((a,b)=>b.createdAt - a.createdAt).slice(0,8);
+  const tbody = document.getElementById('recent-tbody');
+  if (recent.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:40px; color:var(--text-muted);">No cases yet. Click <strong>+ New Case</strong> to get started.</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = recent.map(c => caseRow(c, false)).join('');
+}
+
+// ---- RENDER ALL CASES ----
+function renderAllCases() {
+  let filtered = cases.filter(c => {
+    if (currentFilter === 'All') return true;
+    if (currentFilter === 'Active') return c.status === 'Active' || c.status === 'Hearing Scheduled';
+    return c.status === currentFilter;
+  });
+  if (searchQuery) {
+    const q = searchQuery.toLowerCase();
+    filtered = filtered.filter(c =>
+      c.title?.toLowerCase().includes(q) ||
+      c.client?.toLowerCase().includes(q) ||
+      c.caseNumber?.toLowerCase().includes(q) ||
+      c.court?.toLowerCase().includes(q) ||
+      c.type?.toLowerCase().includes(q)
+    );
+  }
+  if (currentSort.key) {
+    filtered.sort((a,b)=>{
+      let va = a[currentSort.key]||'', vb = b[currentSort.key]||'';
+      if (currentSort.key === 'nextHearing') { va = va||'9'; vb = vb||'9'; }
+      return currentSort.asc ? va.localeCompare(vb) : vb.localeCompare(va);
+    });
+  }
+  const tbody = document.getElementById('all-tbody');
+  const empty = document.getElementById('empty-msg');
+  if (filtered.length === 0) {
+    tbody.innerHTML = '';
+    empty.style.display = 'block';
+  } else {
+    empty.style.display = 'none';
+    tbody.innerHTML = filtered.map(c => caseRow(c, true)).join('');
+  }
+}
+
+function caseRow(c, showActions) {
+  const d = c.nextHearing ? daysUntil(c.nextHearing) : null;
+  const dateClass = d !== null ? (d <= 3 ? 'soon' : d <= 7 ? 'upcoming' : '') : '';
+  const dateLabel = d !== null ? (d < 0 ? `<span style="color:var(--text-muted)">${formatDate(c.nextHearing)}</span>` : `<span class="hearing-date ${dateClass}">${formatDate(c.nextHearing)}</span>`) : '—';
+
+  const assigneeHtml = c.assignee
+    ? `<div class="assignee"><div class="avatar" style="background:${avatarColor(c.assignee)}">${initials(c.assignee)}</div><span>${c.assignee}</span></div>`
+    : `<span style="color:var(--text-muted)">—</span>`;
+
+  const actionsHtml = showActions ? `
+    <td><div class="actions-cell">
+      <button class="icon-btn" title="View" onclick="event.stopPropagation(); openDetail('${c.id}')">👁</button>
+      <button class="icon-btn" title="Edit" onclick="event.stopPropagation(); openEditModal('${c.id}')">✏</button>
+    </div></td>` : '';
+
+  return `<tr class="case-row" onclick="openDetail('${c.id}')">
+    <td><div class="case-num">${c.caseNumber||'—'}</div></td>
+    <td><div class="case-title">${c.title||'Untitled'}</div><div class="case-client">${c.client||''}</div></td>
+    <td>${statusBadge(c.status)}</td>
+    <td><span class="court-tag">${c.court||'—'}</span></td>
+    <td>${dateLabel}</td>
+    <td>${assigneeHtml}</td>
+    ${showActions ? `<td><span style="color:var(--text-muted);font-size:12px;">${c.type||'—'}</span></td>` : ''}
+    ${actionsHtml}
+  </tr>`;
+}
+
+// ---- TABS / NAV ----
+function showTab(tab) {
+  document.getElementById('dashboard-view').style.display = tab === 'dashboard' ? 'flex' : 'none';
+  document.getElementById('cases-view').style.display = tab === 'cases' ? 'block' : 'none';
+  document.getElementById('page-title').textContent = tab === 'dashboard' ? 'Dashboard' : 'All Cases';
+  if (tab === 'dashboard') { document.getElementById('dashboard-view').style.flexDirection='column'; renderDashboard(); }
+  if (tab === 'cases') { currentFilter='All'; document.querySelectorAll('.filter-chip').forEach((c,i)=>c.classList.toggle('active',i===0)); renderAllCases(); }
+}
+
+function filterByStatus(status) {
+  showTab('cases');
+  currentFilter = status;
+  document.querySelectorAll('.filter-chip').forEach(c=>{
+    c.classList.toggle('active', c.textContent===status);
+  });
+  renderAllCases();
+}
+
+function filterByCourt(court) {
+  showTab('cases');
+  currentFilter = 'All';
+  searchQuery = court;
+  document.getElementById('search-input').value = court;
+  renderAllCases();
+}
+
+function setFilter(filter, el) {
+  currentFilter = filter;
+  document.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  renderAllCases();
+}
+
+function sortTable(key) {
+  if (currentSort.key === key) currentSort.asc = !currentSort.asc;
+  else { currentSort.key = key; currentSort.asc = true; }
+  renderAllCases();
+}
+
+function applySearch() {
+  searchQuery = document.getElementById('search-input').value;
+  if (document.getElementById('cases-view').style.display !== 'none') renderAllCases();
+}
+
+// ---- MODALS ----
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+function openNewCase() {
+  ['caseNumber','title','client','opposing','f-value','f-progress','f-notes'].forEach(f=>{ const el=document.getElementById('f-'+f.replace('f-','')); if(el) el.value=''; });
+  document.getElementById('f-caseNumber').value='';
+  document.getElementById('f-title').value='';
+  document.getElementById('f-client').value='';
+  document.getElementById('f-opposing').value='';
+  document.getElementById('f-value').value='';
+  document.getElementById('f-notes').value='';
+  document.getElementById('f-progress').value='';
+  document.getElementById('f-nextHearing').value='';
+  document.getElementById('f-status').value='Active';
+  document.getElementById('f-court').value='Dubai Court of First Instance';
+  document.getElementById('f-type').value='Civil';
+  document.getElementById('f-assignee').value='';
+  openModal('new-case-modal');
+}
+
+function saveNewCase() {
+  const title = document.getElementById('f-title').value.trim();
+  if (!title) { alert('Please enter a case title.'); return; }
+  const c = {
+    id: newId(),
+    createdAt: Date.now(),
+    caseNumber: document.getElementById('f-caseNumber').value.trim(),
+    title,
+    client: document.getElementById('f-client').value.trim(),
+    opposing: document.getElementById('f-opposing').value.trim(),
+    status: document.getElementById('f-status').value,
+    court: document.getElementById('f-court').value,
+    type: document.getElementById('f-type').value,
+    nextHearing: document.getElementById('f-nextHearing').value,
+    assignee: document.getElementById('f-assignee').value,
+    value: document.getElementById('f-value').value.trim(),
+    notes: document.getElementById('f-notes').value.trim(),
+    timeline: []
+  };
+  const prog = document.getElementById('f-progress').value.trim();
+  if (prog) c.timeline.push({ date: new Date().toISOString().slice(0,10), text: prog });
+  cases.unshift(c);
+  save();
+  closeModal('new-case-modal');
+}
+
+// ---- DETAIL MODAL ----
+function openDetail(id) {
+  viewingCaseId = id;
+  const c = cases.find(x=>x.id===id);
+  if (!c) return;
+  document.getElementById('d-title').textContent = c.title;
+  document.getElementById('d-subtitle').textContent = (c.caseNumber||'No Case Number') + ' · ' + (c.court||'');
+
+  const d = c.nextHearing ? daysUntil(c.nextHearing) : null;
+  const dStr = d !== null ? (d === 0 ? ' (Today!)' : d > 0 ? ` (in ${d} day${d===1?'':'s'})` : ` (passed)`) : '';
+
+  let body = `
+  <div class="detail-grid">
+    <div class="detail-item"><div class="detail-label">Status</div><div class="detail-value">${statusBadge(c.status)}</div></div>
+    <div class="detail-item"><div class="detail-label">Case Type</div><div class="detail-value">${c.type||'—'}</div></div>
+    <div class="detail-item"><div class="detail-label">Client</div><div class="detail-value">${c.client||'—'}</div></div>
+    <div class="detail-item"><div class="detail-label">Opposing Party</div><div class="detail-value">${c.opposing||'—'}</div></div>
+    <div class="detail-item"><div class="detail-label">Court</div><div class="detail-value">${c.court||'—'}</div></div>
+    <div class="detail-item"><div class="detail-label">Assigned Attorney</div><div class="detail-value">${c.assignee||'—'}</div></div>
+    <div class="detail-item"><div class="detail-label">Next Hearing</div><div class="detail-value">${formatDate(c.nextHearing)}${dStr}</div></div>
+    <div class="detail-item"><div class="detail-label">Claim Value (AED)</div><div class="detail-value">${c.value ? 'AED '+c.value : '—'}</div></div>
+    <div class="detail-item"><div class="detail-label">Date Added</div><div class="detail-value">${new Date(c.createdAt).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})}</div></div>
+    <div class="detail-item"><div class="detail-label">Case Number</div><div class="detail-value">${c.caseNumber||'—'}</div></div>
+  </div>`;
+
+  if (c.notes) {
+    body += `<div class="section-title">Case Notes</div><div class="note-box">${c.notes}</div>`;
+  }
+
+  if (c.timeline && c.timeline.length > 0) {
+    body += `<div class="section-title">Case Progression Timeline</div><div class="timeline">`;
+    [...c.timeline].reverse().forEach((t, i, arr) => {
+      body += `<div class="timeline-item">
+        <div class="timeline-dot-wrap">
+          <div class="timeline-dot-inner"></div>
+          ${i < arr.length-1 ? '<div class="timeline-line"></div>' : ''}
+        </div>
+        <div class="timeline-content">
+          <div class="timeline-date">${formatDate(t.date)}</div>
+          <div class="timeline-text">${t.text}</div>
+        </div>
+      </div>`;
+    });
+    body += `</div>`;
+  } else {
+    body += `<div class="section-title">Case Progression Timeline</div><p style="color:var(--text-muted); font-size:13px;">No progression updates yet. Edit this case to add updates.</p>`;
+  }
+
+  document.getElementById('detail-body').innerHTML = body;
+  closeModal('edit-modal');
+  openModal('detail-modal');
+}
+
+function editCase() {
+  closeModal('detail-modal');
+  openEditModal(viewingCaseId);
+}
+
+function openEditModal(id) {
+  editingCaseId = id;
+  const c = cases.find(x=>x.id===id);
+  if (!c) return;
+  document.getElementById('e-caseNumber').value = c.caseNumber||'';
+  document.getElementById('e-title').value = c.title||'';
+  document.getElementById('e-client').value = c.client||'';
+  document.getElementById('e-opposing').value = c.opposing||'';
+  document.getElementById('e-status').value = c.status||'Active';
+  document.getElementById('e-court').value = c.court||'Dubai Court of First Instance';
+  document.getElementById('e-type').value = c.type||'Civil';
+  document.getElementById('e-nextHearing').value = c.nextHearing||'';
+  document.getElementById('e-assignee').value = c.assignee||'';
+  document.getElementById('e-value').value = c.value||'';
+  document.getElementById('e-notes').value = c.notes||'';
+  document.getElementById('e-progress').value = '';
+  openModal('edit-modal');
+}
+
+function saveEdit() {
+  const c = cases.find(x=>x.id===editingCaseId);
+  if (!c) return;
+  c.caseNumber = document.getElementById('e-caseNumber').value.trim();
+  c.title = document.getElementById('e-title').value.trim();
+  c.client = document.getElementById('e-client').value.trim();
+  c.opposing = document.getElementById('e-opposing').value.trim();
+  c.status = document.getElementById('e-status').value;
+  c.court = document.getElementById('e-court').value;
+  c.type = document.getElementById('e-type').value;
+  c.nextHearing = document.getElementById('e-nextHearing').value;
+  c.assignee = document.getElementById('e-assignee').value;
+  c.value = document.getElementById('e-value').value.trim();
+  c.notes = document.getElementById('e-notes').value.trim();
+  const prog = document.getElementById('e-progress').value.trim();
+  if (prog) {
+    if (!c.timeline) c.timeline = [];
+    c.timeline.push({ date: new Date().toISOString().slice(0,10), text: prog });
+  }
+  save();
+  closeModal('edit-modal');
+}
+
+function deleteCase() {
+  if (!confirm('Delete this case? This cannot be undone.')) return;
+  cases = cases.filter(x=>x.id!==editingCaseId);
+  save();
+  closeModal('edit-modal');
+}
+
+// Close on overlay click
+document.querySelectorAll('.modal-overlay').forEach(el=>{
+  el.addEventListener('click', e => { if (e.target === el) el.classList.remove('open'); });
+});
+
+// ---- LOAD SAMPLE DATA IF EMPTY ----
+function loadSampleData() {
+  // Force reload with real cases — clears any previously stored demo data
+  const storedVersion = localStorage.getItem('lexhub_version');
+  if (storedVersion === 'v2_real') return; // already loaded real cases
+
+  const today = new Date();
+  function futureDate(days) {
+    const d = new Date(today);
+    d.setDate(d.getDate() + days);
+    return d.toISOString().slice(0,10);
+  }
+  cases = [
+    {
+      id: newId(),
+      createdAt: Date.now() - 5e7,
+      caseNumber: 'OMAN/ARB/2026/001',
+      title: 'Rashid Al-Mughaizwi Trad. & Cont. Co. v. NOMAC Maintenance Energy Services',
+      client: 'Rashid Salim Humaid Al-Mughaizwi Trading & Contracting Co.',
+      opposing: 'NOMAC Maintenance Energy Services (NMES)',
+      status: 'Active',
+      court: 'Dubai Court of First Instance',
+      type: 'Commercial',
+      nextHearing: futureDate(21),
+      assignee: 'Sudheer Devarajan',
+      value: 'OMR 56,813',
+      notes: 'Unpaid invoice claim for manpower services rendered at Sohar 3 GT & GTG 11 outage works in Oman (Feb–Apr 2025). Client performed services under Service Agreement dated 30 May 2023 and LPO No. 8300032314. Invoice No. RSHM/INV/NMES/43/2025 submitted May 2025. Respondent requested revised invoice with updated bank details on 5 Aug 2025 — revised invoice submitted same day. On 5 Feb 2026, Respondent issued Notice of Rescission (signed by EVP Harald Schmit) alleging bribery and corruption — all allegations categorically denied. Respondent incorrectly referenced PO No. 8300034904 which was already fully paid. Affirmation of contract argued through Respondent conduct: acceptance of services, internal payment processing, and request for revised invoice.',
+      timeline: [
+        { date: '2023-05-30', text: 'Service Agreement executed between client and NMES' },
+        { date: '2025-02-01', text: 'Client mobilised manpower for Sohar 3 GT & GTG 11 outage under LPO No. 8300032314' },
+        { date: '2025-05-10', text: 'Tax Invoice No. RSHM/INV/NMES/43/2025 submitted — OMR 56,813.794' },
+        { date: '2025-08-05', text: 'NMES requested revised invoice with updated bank account details. Revised invoice submitted same day.' },
+        { date: '2026-02-05', text: 'NMES issued Notice of Rescission alleging bribery and corruption — signed by EVP Harald Schmit. All payment obligations purportedly extinguished.' },
+        { date: '2026-03-06', text: 'Statement of Case prepared. Client categorically denies all allegations. Affirmation and wrongful rescission arguments being advanced.' }
+      ]
+    },
+    {
+      id: newId(),
+      createdAt: Date.now() - 3e7,
+      caseNumber: 'UAE/LAB/2026/002',
+      title: 'Amol Vishnu Shinde — Suspension & Disciplinary Defence',
+      client: 'Amol Vishnu Shinde',
+      opposing: 'RNA Resource Group Ltd / Splash (Landmark Group)',
+      status: 'Active',
+      court: 'Labour Court',
+      type: 'Labour',
+      nextHearing: futureDate(14),
+      assignee: 'Sudheer Devarajan',
+      value: 'AED 18,400/month',
+      notes: 'Client is Buying Manager at Splash (Landmark Group), employed since Jan 2017, salary AED 18,400/month. Suspended 20 Jan 2026 with immediate effect. Disciplinary Investigation Meeting held same day. Allegations: (1) Commission via spousal salary — wife Mrs. Tejasvi employed by RN Enterprise Bangladesh as Operations Manager from Sep 2021 at AED 8,000/month, alleged to be cover for commissions; (2) Leaking confidential info to competitor Apparel Group; (3) Supplier favouritism toward Icarus Fashion; (4) Money laundering re Indian property funds transferred to UAE; (5) Bank forgery — wife allegedly forged salary certificates. Investigation ongoing, no final conclusions drawn. Client denies all allegations.',
+      timeline: [
+        { date: '2017-01-30', text: 'Client joined Splash (Landmark Group) as Assistant Buyer' },
+        { date: '2017-09-05', text: 'Probation completed. Confirmed as regular employee.' },
+        { date: '2021-09-15', text: 'Mrs. Tejasvi commenced employment at RN Enterprise (Bangladesh) as Operations Manager — AED 8,000/month' },
+        { date: '2026-01-20', text: 'Client suspended from duties at RNA Resource Group with immediate effect. Disciplinary Investigation Meeting held same day.' },
+        { date: '2026-03-06', text: 'Summary of facts prepared. Defence strategy under preparation. Investigation ongoing — no final conclusions drawn.' }
+      ]
+    },
+    {
+      id: newId(),
+      createdAt: Date.now() - 2e7,
+      caseNumber: 'DIFC/2026/003',
+      title: 'Sidorov v. Inovexa Holding Co. & Jogi De Silva',
+      client: 'Jogi De Silva (Respondent 2)',
+      opposing: 'Vyacheslav Sidorov',
+      status: 'Active',
+      court: 'DIFC Court',
+      type: 'Commercial',
+      nextHearing: futureDate(10),
+      assignee: 'Sudheer Devarajan',
+      value: '',
+      notes: 'Claimant Sidorov alleges: (1) unlawful share transfer of his shares in Inovexa Holding to De Silva on 22 Apr 2025 without consent; (2) unlawful removal from commercial license; (3) fraud; (4) forgery of signature on share transfer document — raised late on 25 Feb 2026. Expert report strongly in client favour: Inovexa incorporated at request of true beneficial owner Yevgeny Gorokhov — Sidorov was always only nominal owner; De Silva was nominal owner paid USD 3,500/month by Gorokhov; Meydan Free Zone confirmed transfer was consensual per Shareholders Resolution bearing Sidorov signature and company seal; no damages established; claimant own representatives acknowledged signature was abbreviated variant used from Nov 2024. One live issue remaining: forgery allegation — but significantly weakened by claimant own concession.',
+      timeline: [
+        { date: '2024-08-07', text: 'Consultancy agreement between White Square Company and Gorokhov — Inovexa to be set up at Gorokhov request with Sidorov as nominal owner' },
+        { date: '2024-08-23', text: 'Inovexa Holding Company incorporated at Meydan Free Zone. Sidorov listed as nominal owner/manager only.' },
+        { date: '2025-04-22', text: 'Share transfer executed — De Silva replaced Sidorov as nominal owner per Gorokhov direction. Shareholders Resolution signed by both parties.' },
+        { date: '2026-02-06', text: 'Claimant representatives acknowledged signature on transfer was an abbreviated variant of Sidorov signature used from Nov 2024.' },
+        { date: '2026-02-19', text: 'Meydan Free Zone confirmed to expert that transfer was carried out with claimant knowledge and consent.' },
+        { date: '2026-02-25', text: 'Claimant raised forgery allegation late in proceedings.' },
+        { date: '2026-03-06', text: 'Expert report note prepared. Findings almost entirely in client favour. Forgery allegation is sole remaining live issue for court determination.' }
+      ]
+    }
+  ];
+  localStorage.setItem('lexhub_version', 'v2_real');
+  localStorage.setItem('lexhub_cases', JSON.stringify(cases));
+}
+loadSampleData();
+renderDashboard();
+</script>
+</body>
+</html>
